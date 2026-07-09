@@ -213,6 +213,8 @@ export default function Home() {
             <ListCard title="Risks" items={result.risks} color="rose" delay={400} />
             <ListCard title="Suggestions" items={result.suggestions} color="violet" delay={500} />
           </div>
+
+
         </div>
       )}
     </div>

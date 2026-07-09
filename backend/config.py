@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
     ALLOWED_ORIGINS: str = "http://localhost:3000"
+    OPENROUTER_API_KEY: str = ""
+    OPENROUTER_MODEL: str = "google/gemini-2.5-flash"
 
     @property
     def ALLOWED_ORIGINS_LIST(self) -> list[str]:
