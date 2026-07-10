@@ -12,15 +12,13 @@ from config import settings
 app = FastAPI(title=settings.APP_NAME, version=settings.APP_VERSION)
 
 ALLOWED_ORIGINS = [
-    "https://rs-startuplaunch.vercel.app",
-    "http://localhost:3000",
-    "https://startuplauch-production.up.railway.app",
+    "*",
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
