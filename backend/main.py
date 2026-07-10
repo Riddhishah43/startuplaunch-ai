@@ -54,7 +54,12 @@ class AnalyzeRequest(BaseModel):
 
 @app.get("/api/health")
 async def health_check():
-    return {"status": "ok", "app": settings.APP_NAME, "version": settings.APP_VERSION}
+    return {
+        "status": "ok",
+        "app": settings.APP_NAME,
+        "version": settings.APP_VERSION,
+        "allowed_origins": ALLOWED_ORIGINS,
+    }
 
 
 @app.post("/analyze")
