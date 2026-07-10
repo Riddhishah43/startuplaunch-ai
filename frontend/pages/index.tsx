@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://startuplauch-production.up.railway.app";
 
 const INDUSTRIES = [
   "",
@@ -43,21 +43,28 @@ export default function Home() {
   const [audience, setAudience] = useState("");
   const [country, setCountry] = useState("");
   const [result, setResult] = useState<AnalyzeResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setResult(null);
+    setError(null);
     try {
       const res = await fetch(`${API_URL}/analyze`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idea, industry, target_audience: audience, country }),
       });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.detail || `Server error (${res.status})`);
+      }
       setResult(await res.json());
-    } catch {
-      alert("Backend unreachable. Ensure the API server is running on port 8000.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Backend unreachable. Ensure the API server is running on port 8000.";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -158,6 +165,13 @@ export default function Home() {
           )}
         </button>
       </form>
+
+      {/* Error message */}
+      {error && (
+        <div className="w-full max-w-2xl mt-4 bg-rose-500/10 border border-rose-500/30 rounded-xl px-5 py-3 text-rose-300 text-sm">
+          {error}
+        </div>
+      )}
 
       {/* Result Dashboard */}
       {result && (
