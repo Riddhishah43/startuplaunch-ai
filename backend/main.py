@@ -11,9 +11,15 @@ from config import settings
 
 app = FastAPI(title=settings.APP_NAME, version=settings.APP_VERSION)
 
+ALLOWED_ORIGINS = [
+    "https://rs-startuplaunch.vercel.app",
+    "http://localhost:3000",
+    "https://startuplauch-production.up.railway.app",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS_LIST,
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -81,22 +87,37 @@ async def analyze_idea(payload: AnalyzeRequest):
 
     raw = data["choices"][0]["message"]["content"].strip()
 
-    # Strip markdown fences if present
     raw = re.sub(r"^```(?:json)?\s*", "", raw)
     raw = re.sub(r"\s*```$", "", raw)
 
-    analysis = json.loads(raw)
+    try:
+        analysis = json.loads(raw)
+    except json.JSONDecodeError:
+        print(f"Failed to parse LLM response: {raw}")
+        return {
+            "idea": payload.idea,
+            "industry": payload.industry or "Not specified",
+            "target_audience": payload.target_audience or "Not specified",
+            "country": payload.country or "Not specified",
+            "score": 0,
+            "verdict": "Underdeveloped",
+            "market_size_estimate": "N/A",
+            "competition_level": "N/A",
+            "strengths": [],
+            "risks": ["Unable to parse AI response"],
+            "suggestions": ["Please try again later"],
+        }
 
     return {
         "idea": payload.idea,
         "industry": payload.industry or "Not specified",
         "target_audience": payload.target_audience or "Not specified",
         "country": payload.country or "Not specified",
-        "score": int(analysis["score"]),
-        "verdict": analysis["verdict"],
-        "market_size_estimate": analysis["market_size_estimate"],
-        "competition_level": analysis["competition_level"],
-        "strengths": analysis["strengths"],
-        "risks": analysis["risks"],
-        "suggestions": analysis["suggestions"],
+        "score": int(analysis.get("score", 0)),
+        "verdict": analysis.get("verdict", "Underdeveloped"),
+        "market_size_estimate": analysis.get("market_size_estimate", "N/A"),
+        "competition_level": analysis.get("competition_level", "N/A"),
+        "strengths": analysis.get("strengths", []),
+        "risks": analysis.get("risks", []),
+        "suggestions": analysis.get("suggestions", []),
     }
