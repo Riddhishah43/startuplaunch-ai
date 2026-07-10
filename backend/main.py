@@ -12,7 +12,8 @@ from config import settings
 app = FastAPI(title=settings.APP_NAME, version=settings.APP_VERSION)
 
 ALLOWED_ORIGINS = [
-    "*",
+    "https://rs-startuplaunch.vercel.app",
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
@@ -52,12 +53,7 @@ class AnalyzeRequest(BaseModel):
 
 @app.get("/api/health")
 async def health_check():
-    return {
-        "status": "ok",
-        "app": settings.APP_NAME,
-        "version": settings.APP_VERSION,
-        "allowed_origins": ALLOWED_ORIGINS,
-    }
+    return {"status": "ok", "app": settings.APP_NAME, "version": settings.APP_VERSION}
 
 
 @app.post("/analyze")
